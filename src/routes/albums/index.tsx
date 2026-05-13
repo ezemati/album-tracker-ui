@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
+import { useAuthStore } from '#/auth/store';
+import { albumClient, type AlbumSummaryResponse } from '#/lib/albumClient';
+import { collectionClient, type UserCollectionSummaryResponse } from '#/lib/collectionClient';
 
-import { api } from '../lib/api';
-import type { AlbumSummaryResponse, UserCollectionSummaryResponse } from '../lib/api';
-import { getErrorMessage } from '../lib/errors';
-import { useAuthStore } from '../stores/auth-store';
-
-export const Route = createFileRoute('/albums')({ component: Albums });
+export const Route = createFileRoute('/albums/')({ component: Albums });
 
 function Albums() {
-    const navigate = useNavigate();
-    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    const hasHydrated = useAuthStore((state) => state.hasHydrated);
+    const navigate = Route.useNavigate();
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
     const [albums, setAlbums] = useState<AlbumSummaryResponse[]>([]);
     const [collections, setCollections] = useState<UserCollectionSummaryResponse[]>([]);
     const [error, setError] = useState<string | null>(null);
@@ -27,17 +24,17 @@ function Albums() {
 
             try {
                 const [albumList, collectionList] = await Promise.all([
-                    api.listAlbums(),
-                    isAuthenticated ? api.listCollections() : Promise.resolve([]),
+                    albumClient.listAlbums(),
+                    isAuthenticated ? collectionClient.listCollections() : Promise.resolve([]),
                 ]);
 
                 if (isActive) {
                     setAlbums(albumList);
                     setCollections(collectionList);
                 }
-            } catch (loadError) {
+            } catch {
                 if (isActive) {
-                    setError(getErrorMessage(loadError));
+                    setError('Error');
                 }
             } finally {
                 if (isActive) {
@@ -46,18 +43,17 @@ function Albums() {
             }
         }
 
-        if (hasHydrated) {
-            void loadAlbums();
-        }
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        loadAlbums();
 
         return () => {
             isActive = false;
         };
-    }, [hasHydrated, isAuthenticated]);
+    }, [isAuthenticated]);
 
     async function handleSubscribe(albumId: string) {
         if (!isAuthenticated) {
-            await navigate({ to: '/login' });
+            await navigate({ to: '/auth/login' });
             return;
         }
 
@@ -65,11 +61,11 @@ function Albums() {
         setError(null);
 
         try {
-            const collection = await api.subscribeToAlbum(albumId);
+            const collection = await collectionClient.subscribeToAlbum(albumId);
             setCollections((current) => [...current, collection]);
             await navigate({ to: '/collections/$collectionId', params: { collectionId: collection.id } });
-        } catch (subscribeError) {
-            setError(getErrorMessage(subscribeError));
+        } catch {
+            setError('Error');
         } finally {
             setSubscribingAlbumId(null);
         }
@@ -81,7 +77,7 @@ function Albums() {
         <section>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <p className="text-sm font-bold uppercase tracking-[0.3em] text-amber-300">Available albums</p>
+                    <p className="text-sm font-bold tracking-[0.3em] text-amber-300 uppercase">Available albums</p>
                     <h1 className="mt-3 text-4xl font-black text-white">Choose a collection to track</h1>
                 </div>
                 <Link to="/collections" className="text-sm font-bold text-amber-300 hover:text-amber-200">
@@ -93,7 +89,7 @@ function Albums() {
             {isLoading ? <p className="mt-8 text-slate-300">Loading albums...</p> : null}
 
             {!isLoading && albums.length === 0 ? (
-                <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-slate-300">
+                <div className="mt-8 rounded-3xl border border-white/10 bg-white/3 p-8 text-slate-300">
                     No albums are available yet.
                 </div>
             ) : null}
@@ -103,10 +99,7 @@ function Albums() {
                     const isSubscribed = subscribedAlbumIds.has(album.id);
 
                     return (
-                        <article
-                            key={album.id}
-                            className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6"
-                        >
+                        <article key={album.id} className="rounded-[1.75rem] border border-white/10 bg-white/4 p-6">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
                                     <h2 className="text-2xl font-black text-white">{album.name}</h2>

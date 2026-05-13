@@ -1,22 +1,15 @@
 import { useEffect, useState } from 'react';
 import type { SubmitEvent } from 'react';
 import { Link, createFileRoute } from '@tanstack/react-router';
+import { collectionClient, type UserCardResponse, type UserCollectionDetailResponse } from '#/lib/collectionClient';
+import { albumClient, type AlbumDetailResponse } from '#/lib/albumClient';
 
-import { RequireAuth } from '../components/RequireAuth';
-import { api } from '../lib/api';
-import type { AlbumDetailResponse, UserCardResponse, UserCollectionDetailResponse } from '../lib/api';
-import { getErrorMessage } from '../lib/errors';
-
-export const Route = createFileRoute('/collections/$collectionId')({ component: CollectionDetailPage });
+export const Route = createFileRoute('/_authenticated/collections/$collectionId')({ component: CollectionDetailPage });
 
 type CardFilter = 'all' | 'owned' | 'missing' | 'tradable';
 
 function CollectionDetailPage() {
-    return (
-        <RequireAuth>
-            <CollectionDetail />
-        </RequireAuth>
-    );
+    return <CollectionDetail />;
 }
 
 function CollectionDetail() {
@@ -29,9 +22,9 @@ function CollectionDetail() {
     const [mutatingCardId, setMutatingCardId] = useState<string | null>(null);
 
     async function loadCollection() {
-        const detail = await api.getCollection(collectionId);
+        const detail = await collectionClient.getCollection(collectionId);
         setCollection(detail);
-        setAlbumDetail(await api.getAlbum(detail.album.id));
+        setAlbumDetail(await albumClient.getAlbum(detail.album.id));
     }
 
     useEffect(() => {
@@ -42,16 +35,16 @@ function CollectionDetail() {
             setError(null);
 
             try {
-                const detail = await api.getCollection(collectionId);
-                const album = await api.getAlbum(detail.album.id);
+                const detail = await collectionClient.getCollection(collectionId);
+                const album = await albumClient.getAlbum(detail.album.id);
 
                 if (isActive) {
                     setCollection(detail);
                     setAlbumDetail(album);
                 }
-            } catch (loadError) {
+            } catch {
                 if (isActive) {
-                    setError(getErrorMessage(loadError));
+                    setError('Error');
                 }
             } finally {
                 if (isActive) {
@@ -60,7 +53,8 @@ function CollectionDetail() {
             }
         }
 
-        void load();
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        load();
 
         return () => {
             isActive = false;
@@ -72,10 +66,10 @@ function CollectionDetail() {
         setError(null);
 
         try {
-            await api.adjustCardQuantity(collectionId, cardId, delta);
+            await collectionClient.adjustCardQuantity(collectionId, cardId, delta);
             await loadCollection();
-        } catch (adjustError) {
-            setError(getErrorMessage(adjustError));
+        } catch {
+            setError('Error');
         } finally {
             setMutatingCardId(null);
         }
@@ -86,10 +80,10 @@ function CollectionDetail() {
         setError(null);
 
         try {
-            await api.setCardQuantity(collectionId, cardId, quantity);
+            await collectionClient.setCardQuantity(collectionId, cardId, quantity);
             await loadCollection();
-        } catch (setErrorResult) {
-            setError(getErrorMessage(setErrorResult));
+        } catch {
+            setError('Error');
         } finally {
             setMutatingCardId(null);
         }
@@ -135,10 +129,10 @@ function CollectionDetail() {
 
             {collection ? (
                 <>
-                    <div className="mt-6 rounded-[2rem] border border-white/10 bg-gradient-to-br from-slate-900 to-slate-800 p-8">
+                    <div className="mt-6 rounded-4xl border border-white/10 bg-linear-to-br from-slate-900 to-slate-800 p-8">
                         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                             <div>
-                                <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-300">
+                                <p className="text-sm font-bold tracking-[0.3em] text-emerald-300 uppercase">
                                     Collection detail
                                 </p>
                                 <h1 className="mt-3 text-4xl font-black text-white">{collection.album.name}</h1>
@@ -146,11 +140,11 @@ function CollectionDetail() {
                                     {collection.album.description ?? 'Manage card quantities for this album.'}
                                 </p>
                             </div>
-                            <div className="rounded-[1.5rem] bg-emerald-300 p-5 text-center text-slate-950">
+                            <div className="rounded-3xl bg-emerald-300 p-5 text-center text-slate-950">
                                 <div className="text-4xl font-black">
                                     {Math.round(collection.completionPercentage)}%
                                 </div>
-                                <div className="text-sm font-bold uppercase tracking-widest">complete</div>
+                                <div className="text-sm font-bold tracking-widest uppercase">complete</div>
                             </div>
                         </div>
                         <div className="mt-6 h-3 overflow-hidden rounded-full bg-slate-950">
@@ -181,7 +175,7 @@ function CollectionDetail() {
                         </FilterButton>
                     </div>
 
-                    <div className="mt-6 overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.03]">
+                    <div className="mt-6 overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/3">
                         {cards.length === 0 ? (
                             <p className="p-6 text-slate-300">No cards match this filter.</p>
                         ) : (
@@ -214,7 +208,7 @@ interface MetricProps {
 function Metric({ label, value }: MetricProps) {
     return (
         <div className="rounded-2xl bg-slate-950/70 p-4 text-center">
-            <dt className="text-xs font-bold uppercase tracking-widest text-slate-500">{label}</dt>
+            <dt className="text-xs font-bold tracking-widest text-slate-500 uppercase">{label}</dt>
             <dd className="mt-1 text-2xl font-black text-white">{value}</dd>
         </div>
     );
@@ -315,6 +309,7 @@ function QuantityForm({ quantity, disabled, onSetQuantity }: QuantityFormProps) 
     const [draft, setDraft] = useState(String(quantity));
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setDraft(String(quantity));
     }, [quantity]);
 
@@ -335,7 +330,7 @@ function QuantityForm({ quantity, disabled, onSetQuantity }: QuantityFormProps) 
                 value={draft}
                 disabled={disabled}
                 onChange={(event) => setDraft(event.target.value)}
-                className="w-20 rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-center font-black text-white outline-none transition focus:border-amber-300 disabled:opacity-60"
+                className="w-20 rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-center font-black text-white transition outline-none focus:border-amber-300 disabled:opacity-60"
                 aria-label="Card quantity"
             />
             <button

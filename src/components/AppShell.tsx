@@ -1,38 +1,22 @@
-import { useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { Link, useNavigate } from '@tanstack/react-router';
-
-import { api } from '../lib/api';
-import { getStoredRefreshToken, useAuthStore } from '../stores/auth-store';
+import { Link, useNavigate, useRouter } from '@tanstack/react-router';
+import { useAuthStore } from '#/auth/store';
 
 interface AppShellProps {
     children: ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
+    const router = useRouter();
     const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
-    const hasHydrated = useAuthStore((state) => state.hasHydrated);
-    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    const clearSession = useAuthStore((state) => state.clearSession);
-    const markHydrated = useAuthStore((state) => state.markHydrated);
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+    const logout = useAuthStore((state) => state.logout);
 
-    useEffect(() => {
-        if (hasHydrated) {
-            return;
-        }
-
-        if (!getStoredRefreshToken()) {
-            markHydrated();
-            return;
-        }
-
-        void api.restoreSession().catch(() => undefined);
-    }, [hasHydrated, markHydrated]);
-
-    function handleLogout() {
-        clearSession();
-        void navigate({ to: '/login' });
+    async function handleLogout() {
+        logout();
+        await router.invalidate();
+        await navigate({ to: '/auth/login' });
     }
 
     return (
@@ -60,9 +44,9 @@ export function AppShell({ children }: AppShellProps) {
                             </>
                         ) : (
                             <>
-                                <NavLink to="/login">Login</NavLink>
+                                <NavLink to="/auth/login">Login</NavLink>
                                 <Link
-                                    to="/register"
+                                    to="/auth/register"
                                     className="rounded-full bg-amber-300 px-4 py-2 font-semibold text-slate-950 transition hover:bg-amber-200"
                                 >
                                     Register
@@ -78,7 +62,7 @@ export function AppShell({ children }: AppShellProps) {
 }
 
 interface NavLinkProps {
-    to: '/' | '/albums' | '/collections' | '/login' | '/register';
+    to: '/' | '/albums' | '/collections' | '/auth/login' | '/auth/register';
     children: ReactNode;
 }
 

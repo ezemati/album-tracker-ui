@@ -6,7 +6,7 @@ function Home() {
     return (
         <section className="overflow-hidden rounded-4xl border border-white/10 bg-linear-to-br from-slate-900 via-slate-900 to-emerald-950 p-8 shadow-2xl shadow-black/30 sm:p-12">
             <div className="max-w-3xl">
-                <p className="mb-4 text-sm font-bold uppercase tracking-[0.35em] text-amber-300">Collections, sorted</p>
+                <p className="mb-4 text-sm font-bold tracking-[0.35em] text-amber-300 uppercase">Collections, sorted</p>
                 <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl">
                     Track every card you own, miss, and can trade.
                 </h1>

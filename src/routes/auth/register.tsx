@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import type { SubmitEvent } from 'react';
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useAuthStore } from '#/stores/auth-store';
-import { api } from '#/lib/api';
-import { getErrorMessage } from '#/lib/errors';
+import { Link, createFileRoute, useNavigate, useRouter } from '@tanstack/react-router';
+import { useAuthStore } from '#/auth/store';
+import { authClient } from '#/auth/authApi';
 
 export const Route = createFileRoute('/auth/register')({ component: Register });
 
 function Register() {
+    const login = useAuthStore((state) => state.login);
+    const router = useRouter();
     const navigate = useNavigate();
-    const setSession = useAuthStore((state) => state.setSession);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -21,13 +21,12 @@ function Register() {
         setIsSubmitting(true);
 
         try {
-            await api.register(email, password);
-            const session = await api.login(email, password);
-            const user = await api.me(session.access_token);
-            setSession({ accessToken: session.access_token, refreshToken: session.refresh_token, user });
+            await authClient.register({ email, password });
+            await login({ username: email, password });
+            await router.invalidate();
             await navigate({ to: '/albums' });
-        } catch (submitError) {
-            setError(getErrorMessage(submitError));
+        } catch {
+            setError('Error');
         } finally {
             setIsSubmitting(false);
         }
@@ -35,7 +34,7 @@ function Register() {
 
     return (
         <div className="mx-auto max-w-md rounded-4xl border border-white/10 bg-white/4 p-8 shadow-xl shadow-black/20">
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-300">Start tracking</p>
+            <p className="text-sm font-bold tracking-[0.3em] text-emerald-300 uppercase">Start tracking</p>
             <h1 className="mt-3 text-3xl font-black text-white">Create account</h1>
             <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
                 <label className="block">
@@ -46,7 +45,7 @@ function Register() {
                         onChange={(event) => setEmail(event.target.value)}
                         required
                         autoComplete="email"
-                        className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-300"
+                        className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white transition outline-none focus:border-emerald-300"
                     />
                 </label>
                 <label className="block">
@@ -57,7 +56,7 @@ function Register() {
                         onChange={(event) => setPassword(event.target.value)}
                         required
                         autoComplete="new-password"
-                        className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-300"
+                        className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white transition outline-none focus:border-emerald-300"
                     />
                 </label>
                 {error ? <p className="rounded-2xl bg-red-500/15 px-4 py-3 text-sm text-red-200">{error}</p> : null}

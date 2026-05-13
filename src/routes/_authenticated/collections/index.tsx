@@ -1,19 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, createFileRoute } from '@tanstack/react-router';
+import { collectionClient, type UserCollectionSummaryResponse } from '#/lib/collectionClient';
 
-import { RequireAuth } from '../components/RequireAuth';
-import { api } from '../lib/api';
-import type { UserCollectionSummaryResponse } from '../lib/api';
-import { getErrorMessage } from '../lib/errors';
-
-export const Route = createFileRoute('/collections')({ component: CollectionsPage });
+export const Route = createFileRoute('/_authenticated/collections/')({ component: CollectionsPage });
 
 function CollectionsPage() {
-    return (
-        <RequireAuth>
-            <Collections />
-        </RequireAuth>
-    );
+    return <Collections />;
 }
 
 function Collections() {
@@ -30,14 +22,14 @@ function Collections() {
             setError(null);
 
             try {
-                const collectionList = await api.listCollections();
+                const collectionList = await collectionClient.listCollections();
 
                 if (isActive) {
                     setCollections(collectionList);
                 }
-            } catch (loadError) {
+            } catch {
                 if (isActive) {
-                    setError(getErrorMessage(loadError));
+                    setError('Error');
                 }
             } finally {
                 if (isActive) {
@@ -46,7 +38,8 @@ function Collections() {
             }
         }
 
-        void loadCollections();
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        loadCollections();
 
         return () => {
             isActive = false;
@@ -58,10 +51,10 @@ function Collections() {
         setError(null);
 
         try {
-            await api.unsubscribe(collectionId);
+            await collectionClient.unsubscribe(collectionId);
             setCollections((current) => current.filter((collection) => collection.id !== collectionId));
-        } catch (unsubscribeError) {
-            setError(getErrorMessage(unsubscribeError));
+        } catch {
+            setError('Error');
         } finally {
             setUnsubscribingId(null);
         }
@@ -71,7 +64,7 @@ function Collections() {
         <section>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-300">Inventory</p>
+                    <p className="text-sm font-bold tracking-[0.3em] text-emerald-300 uppercase">Inventory</p>
                     <h1 className="mt-3 text-4xl font-black text-white">My collections</h1>
                 </div>
                 <Link
@@ -86,7 +79,7 @@ function Collections() {
             {isLoading ? <p className="mt-8 text-slate-300">Loading collections...</p> : null}
 
             {!isLoading && collections.length === 0 ? (
-                <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-8">
+                <div className="mt-8 rounded-3xl border border-white/10 bg-white/3 p-8">
                     <h2 className="text-2xl font-black text-white">No collections yet</h2>
                     <p className="mt-2 text-slate-300">Subscribe to an album to start tracking your cards.</p>
                     <Link
@@ -100,10 +93,7 @@ function Collections() {
 
             <div className="mt-8 grid gap-5 lg:grid-cols-2">
                 {collections.map((collection) => (
-                    <article
-                        key={collection.id}
-                        className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6"
-                    >
+                    <article key={collection.id} className="rounded-[1.75rem] border border-white/10 bg-white/4 p-6">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                             <div>
                                 <h2 className="text-2xl font-black text-white">{collection.album.name}</h2>
@@ -158,7 +148,7 @@ interface MetricProps {
 function Metric({ label, value }: MetricProps) {
     return (
         <div className="rounded-2xl bg-slate-950/70 p-3">
-            <dt className="text-xs font-bold uppercase tracking-widest text-slate-500">{label}</dt>
+            <dt className="text-xs font-bold tracking-widest text-slate-500 uppercase">{label}</dt>
             <dd className="mt-1 text-xl font-black text-white">{value}</dd>
         </div>
     );

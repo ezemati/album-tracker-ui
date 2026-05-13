@@ -1,41 +1,38 @@
 import { useState } from 'react';
-import type { FormEvent } from 'react';
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
-
-import { api } from '../../lib/api';
-import { getErrorMessage } from '../../lib/errors';
-import { useAuthStore } from '../../stores/auth-store';
+import type { SubmitEvent } from 'react';
+import { Link, createFileRoute, useNavigate, useRouter } from '@tanstack/react-router';
+import { useAuthStore } from '../../auth/store';
 
 export const Route = createFileRoute('/auth/login')({ component: Login });
 
 function Login() {
+    const login = useAuthStore((state) => state.login);
+    const router = useRouter();
     const navigate = useNavigate();
-    const setSession = useAuthStore((state) => state.setSession);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
         setError(null);
         setIsSubmitting(true);
 
         try {
-            const session = await api.login(email, password);
-            const user = await api.me(session.access_token);
-            setSession({ accessToken: session.access_token, refreshToken: session.refresh_token, user });
+            await login({ username: email, password });
+            await router.invalidate();
             await navigate({ to: '/collections' });
-        } catch (submitError) {
-            setError(getErrorMessage(submitError));
+        } catch (submitError: unknown) {
+            setError((submitError as Error).message);
         } finally {
             setIsSubmitting(false);
         }
     }
 
     return (
-        <div className="mx-auto max-w-md rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 shadow-xl shadow-black/20">
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-amber-300">Welcome back</p>
+        <div className="mx-auto max-w-md rounded-4xl border border-white/10 bg-white/4 p-8 shadow-xl shadow-black/20">
+            <p className="text-sm font-bold tracking-[0.3em] text-amber-300 uppercase">Welcome back</p>
             <h1 className="mt-3 text-3xl font-black text-white">Login</h1>
             <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
                 <label className="block">
@@ -46,7 +43,7 @@ function Login() {
                         onChange={(event) => setEmail(event.target.value)}
                         required
                         autoComplete="email"
-                        className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-amber-300"
+                        className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white transition outline-none focus:border-amber-300"
                     />
                 </label>
                 <label className="block">
@@ -57,7 +54,7 @@ function Login() {
                         onChange={(event) => setPassword(event.target.value)}
                         required
                         autoComplete="current-password"
-                        className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-amber-300"
+                        className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white transition outline-none focus:border-amber-300"
                     />
                 </label>
                 {error ? <p className="rounded-2xl bg-red-500/15 px-4 py-3 text-sm text-red-200">{error}</p> : null}

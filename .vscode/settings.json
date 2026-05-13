@@ -16,5 +16,17 @@
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
         "**/node_modules": true
+    },
+
+    "[typescript][typescriptreact]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {}
+    },
+
+    "[javascript][javascriptreact]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {}
     }
 }

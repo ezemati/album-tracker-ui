@@ -8,7 +8,12 @@ import { type AlbumDetailResponse } from '#/lib/albumClient';
 import { collectionClient, type UserCardResponse, type UserCollectionDetailResponse } from '#/lib/collectionClient';
 import { queries } from '#/lib/queries';
 
-export const Route = createFileRoute('/_authenticated/collections/$collectionId')({ component: CollectionDetailPage });
+export const Route = createFileRoute('/_authenticated/collections/$collectionId')({
+    loader: async ({ context: { queryClient }, params: { collectionId } }) => {
+        await queryClient.ensureQueryData(queries.collections.detail(collectionId));
+    },
+    component: CollectionDetailPage,
+});
 
 type CardFilter = 'all' | 'owned' | 'missing' | 'tradable';
 

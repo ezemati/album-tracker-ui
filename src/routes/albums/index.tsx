@@ -6,7 +6,15 @@ import { type AlbumSummaryResponse } from '#/lib/albumClient';
 import { collectionClient } from '#/lib/collectionClient';
 import { queries } from '#/lib/queries';
 
-export const Route = createFileRoute('/albums/')({ component: Albums });
+export const Route = createFileRoute('/albums/')({
+    loader: async ({ context: { queryClient, currentUser } }) => {
+        await Promise.all([
+            queryClient.ensureQueryData(queries.albums.all),
+            currentUser ? queryClient.ensureQueryData(queries.collections.all) : Promise.resolve(),
+        ]);
+    },
+    component: Albums,
+});
 
 function Albums() {
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated());

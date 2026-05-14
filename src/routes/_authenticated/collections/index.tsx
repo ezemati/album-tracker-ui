@@ -4,7 +4,12 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { collectionClient, type UserCollectionSummaryResponse } from '#/lib/collectionClient';
 import { queries } from '#/lib/queries';
 
-export const Route = createFileRoute('/_authenticated/collections/')({ component: CollectionsPage });
+export const Route = createFileRoute('/_authenticated/collections/')({
+    loader: async ({ context: { queryClient } }) => {
+        await queryClient.ensureQueryData(queries.collections.all);
+    },
+    component: CollectionsPage,
+});
 
 function CollectionsPage() {
     return <Collections />;

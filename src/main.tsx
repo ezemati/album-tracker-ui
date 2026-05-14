@@ -4,8 +4,14 @@ import { StrictMode, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 
 import { useAuthStore } from './auth/store';
+import { AuthProvider, useCurrentUser } from './auth/useCurrentUser';
 import { queryClient } from './lib/queryClient';
 import { router } from './router';
+
+function InitializedApp() {
+    const { currentUser } = useCurrentUser();
+    return <RouterProvider router={router} context={{ currentUser }} />;
+}
 
 function AuthApp() {
     const status = useAuthStore((state) => state.status);
@@ -20,13 +26,15 @@ function AuthApp() {
         return 'Loading...';
     }
 
-    return <RouterProvider router={router} />;
+    return <InitializedApp />;
 }
 
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
-            <AuthApp />
+            <AuthProvider>
+                <AuthApp />
+            </AuthProvider>
         </QueryClientProvider>
     );
 }

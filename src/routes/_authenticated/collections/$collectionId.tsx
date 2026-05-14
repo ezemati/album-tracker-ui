@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import type { SubmitEvent } from 'react';
-import { Link, createFileRoute } from '@tanstack/react-router';
-import { collectionClient, type UserCardResponse, type UserCollectionDetailResponse } from '#/lib/collectionClient';
-import { type AlbumDetailResponse } from '#/lib/albumClient';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { queries } from '#/lib/queries';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { clsx } from 'clsx';
+import type { SubmitEvent } from 'react';
+import { useState } from 'react';
+
+import { type AlbumDetailResponse } from '#/lib/albumClient';
+import { collectionClient, type UserCardResponse, type UserCollectionDetailResponse } from '#/lib/collectionClient';
+import { queries } from '#/lib/queries';
 
 export const Route = createFileRoute('/_authenticated/collections/$collectionId')({ component: CollectionDetailPage });
 

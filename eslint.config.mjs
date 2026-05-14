@@ -2,9 +2,10 @@
 
 import js from '@eslint/js';
 import { defineConfig } from 'eslint/config';
-import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default defineConfig([
     js.configs.recommended,
@@ -20,19 +21,19 @@ export default defineConfig([
         },
         rules: {
             '@typescript-eslint/no-confusing-void-expression': 'off',
-            '@typescript-eslint/restrict-template-expressions': [
-                'error',
-                {
-                    allowBoolean: true,
-                    allowNumber: true,
-                },
-            ],
             '@typescript-eslint/no-misused-promises': [
                 'error',
                 {
                     checksVoidReturn: {
                         attributes: false,
                     },
+                },
+            ],
+            '@typescript-eslint/restrict-template-expressions': [
+                'error',
+                {
+                    allowBoolean: true,
+                    allowNumber: true,
                 },
             ],
         },
@@ -48,6 +49,15 @@ export default defineConfig([
         rules: {
             ...reactHooks.configs.flat.recommended.rules,
             'react-hooks/exhaustive-deps': 'error',
+        },
+    },
+    {
+        plugins: {
+            'simple-import-sort': simpleImportSort,
+        },
+        rules: {
+            'simple-import-sort/imports': 'error',
+            'simple-import-sort/exports': 'error',
         },
     },
     // ...tanstackConfig,

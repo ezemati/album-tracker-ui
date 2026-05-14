@@ -1,4 +1,4 @@
-import { unwrap, type BaseResponse } from './base';
+import { type BaseResponse, unwrap } from './base';
 import { api } from './http';
 
 export interface AlbumSummaryResponse {

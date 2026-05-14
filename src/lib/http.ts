@@ -1,8 +1,10 @@
 import axios, { AxiosError, HttpStatusCode } from 'axios';
-import { config } from './config';
+
 import { useAuthStore } from '#/auth/store';
-import type { RetriableAxiosRequestConfig } from './axios.types';
 import { router } from '#/router';
+
+import type { RetriableAxiosRequestConfig } from './axios.types';
+import { config } from './config';
 
 /**
  * Axios Client for authenticated requests (i.e. non-auth related)

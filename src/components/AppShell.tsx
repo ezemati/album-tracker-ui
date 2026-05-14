@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
 import { Link, useNavigate, useRouter } from '@tanstack/react-router';
+import type { ReactNode } from 'react';
+
 import { useAuthStore } from '#/auth/store';
 
 interface AppShellProps {

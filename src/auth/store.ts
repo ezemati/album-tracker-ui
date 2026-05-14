@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import type { AuthStatus, LoginRequest, LoginResponse, MeResponse, RefreshResponse } from './types';
-import { refreshTokenStorage } from './refreshTokenStorage';
+
 import { authClient } from './authApi';
+import { refreshTokenStorage } from './refreshTokenStorage';
+import type { AuthStatus, LoginRequest, LoginResponse, MeResponse, RefreshResponse } from './types';
 
 interface AuthState {
     accessToken: string | null;

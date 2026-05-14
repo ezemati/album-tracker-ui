@@ -1,6 +1,7 @@
-import { Link, createFileRoute } from '@tanstack/react-router';
-import { collectionClient, type UserCollectionSummaryResponse } from '#/lib/collectionClient';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createFileRoute, Link } from '@tanstack/react-router';
+
+import { collectionClient, type UserCollectionSummaryResponse } from '#/lib/collectionClient';
 import { queries } from '#/lib/queries';
 
 export const Route = createFileRoute('/_authenticated/collections/')({ component: CollectionsPage });

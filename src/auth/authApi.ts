@@ -1,5 +1,7 @@
-import { config } from '#/lib/config';
 import axios from 'axios';
+
+import { config } from '#/lib/config';
+
 import type { LoginRequest, LoginResponse, RefreshRequest, RefreshResponse, RegisterRequest } from './types';
 
 /**

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { createFileRoute, Link, useNavigate, useRouter } from '@tanstack/react-router';
 import type { SubmitEvent } from 'react';
-import { Link, createFileRoute, useNavigate, useRouter } from '@tanstack/react-router';
-import { useAuthStore } from '#/auth/store';
+import { useState } from 'react';
+
 import { authClient } from '#/auth/authApi';
+import { useAuthStore } from '#/auth/store';
 
 export const Route = createFileRoute('/auth/register')({ component: Register });
 

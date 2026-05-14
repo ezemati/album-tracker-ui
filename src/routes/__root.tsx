@@ -1,17 +1,29 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router';
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
-import { TanStackDevtools } from '@tanstack/react-devtools';
-
 import '../styles.css';
 
-export const Route = createRootRoute({
+import { TanStackDevtools } from '@tanstack/react-devtools';
+import type { QueryClient } from '@tanstack/react-query';
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
+import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
+
+import type { MeResponse } from '#/auth/types';
+
+import { AppShell } from '../components/AppShell';
+
+export interface MyRouterContext {
+    queryClient: QueryClient;
+    currentUser: MeResponse | null;
+}
+
+export const Route = createRootRouteWithContext<MyRouterContext>()({
     component: RootComponent,
 });
 
 function RootComponent() {
     return (
         <>
-            <Outlet />
+            <AppShell>
+                <Outlet />
+            </AppShell>
             <TanStackDevtools
                 config={{
                     position: 'bottom-right',

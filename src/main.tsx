@@ -1,22 +1,52 @@
+import { QueryClientProvider } from '@tanstack/react-query';
+import { RouterProvider } from '@tanstack/react-router';
+import { StrictMode, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import { RouterProvider, createRouter } from '@tanstack/react-router';
-import { routeTree } from './routeTree.gen';
 
-const router = createRouter({
-    routeTree,
-    defaultPreload: 'intent',
-    scrollRestoration: true,
-});
+import { useAuthStore } from './auth/store';
+import { AuthProvider, useCurrentUser } from './auth/useCurrentUser';
+import { queryClient } from './lib/queryClient';
+import { router } from './router';
 
-declare module '@tanstack/react-router' {
-    interface Register {
-        router: typeof router;
-    }
+function InitializedApp() {
+    const { currentUser } = useCurrentUser();
+    return <RouterProvider router={router} context={{ currentUser }} />;
 }
 
+function AuthApp() {
+    const status = useAuthStore((state) => state.status);
+    const initialize = useAuthStore((state) => state.initialize);
+
+    useEffect(() => {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        initialize();
+    }, [initialize]);
+
+    if (status === 'Checking') {
+        return 'Loading...';
+    }
+
+    return <InitializedApp />;
+}
+
+function App() {
+    return (
+        <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+                <AuthApp />
+            </AuthProvider>
+        </QueryClientProvider>
+    );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const rootElement = document.getElementById('app')!;
 
 if (!rootElement.innerHTML) {
     const root = ReactDOM.createRoot(rootElement);
-    root.render(<RouterProvider router={router} />);
+    root.render(
+        <StrictMode>
+            <App />
+        </StrictMode>,
+    );
 }

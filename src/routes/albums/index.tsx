@@ -24,7 +24,7 @@ function Albums() {
         ...queries.collections.all,
         enabled: isAuthenticated,
     });
-    const isLoading = albumsQuery.isPending || collectionsQuery.isPending;
+    const isLoading = albumsQuery.isPending || (collectionsQuery.isEnabled && collectionsQuery.isPending);
 
     const subscribedAlbumIds = new Set(
         collectionsQuery.data ? collectionsQuery.data.map((collection) => collection.album.id) : [],

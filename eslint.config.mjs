@@ -40,14 +40,13 @@ export default defineConfig([
     },
     {
         files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
-        ...reactHooks.configs.flat.recommended,
+        extends: [reactHooks.configs.flat.recommended],
         languageOptions: {
             globals: {
                 ...globals.browser,
             },
         },
         rules: {
-            ...reactHooks.configs.flat.recommended.rules,
             'react-hooks/exhaustive-deps': 'error',
         },
     },

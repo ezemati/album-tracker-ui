@@ -4,13 +4,11 @@ import { StrictMode, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 
 import { useAuthStore } from './auth/store';
-import { AuthProvider, useCurrentUser } from './auth/useCurrentUser';
 import { queryClient } from './lib/queryClient';
 import { router } from './router';
 
 function InitializedApp() {
-    const { currentUser } = useCurrentUser();
-    return <RouterProvider router={router} context={{ currentUser }} />;
+    return <RouterProvider router={router} />;
 }
 
 function AuthApp() {
@@ -32,9 +30,7 @@ function AuthApp() {
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
-            <AuthProvider>
-                <AuthApp />
-            </AuthProvider>
+            <AuthApp />
         </QueryClientProvider>
     );
 }

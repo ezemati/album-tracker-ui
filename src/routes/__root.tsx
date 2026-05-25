@@ -5,13 +5,10 @@ import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
-import type { MeResponse } from '#/auth/types';
-
 import { AppShell } from '../components/AppShell';
 
 export interface MyRouterContext {
     queryClient: QueryClient;
-    currentUser: MeResponse | null;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({

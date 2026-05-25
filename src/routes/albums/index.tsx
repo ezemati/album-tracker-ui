@@ -7,10 +7,11 @@ import { collectionClient } from '#/lib/collectionClient';
 import { queries } from '#/lib/queries';
 
 export const Route = createFileRoute('/albums/')({
-    loader: async ({ context: { queryClient, currentUser } }) => {
+    loader: async ({ context: { queryClient } }) => {
+        const isAuthenticated = useAuthStore.getState().isAuthenticated();
         await Promise.all([
             queryClient.ensureQueryData(queries.albums.all),
-            currentUser ? queryClient.ensureQueryData(queries.collections.all) : Promise.resolve(),
+            isAuthenticated ? queryClient.ensureQueryData(queries.collections.all) : Promise.resolve(),
         ]);
     },
     component: Albums,

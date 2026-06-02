@@ -40,7 +40,7 @@ export default defineConfig([
     },
     {
         files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
-        extends: [reactHooks.configs.flat.recommended],
+        extends: [reactHooks.configs.flat['recommended-latest']],
         languageOptions: {
             globals: {
                 ...globals.browser,
